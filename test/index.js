@@ -1,5 +1,5 @@
 import ReactDOM from "react-dom";
-import MultiTable from "../src";
+import MultiTable from "../dist";
 import { Table } from "antd";
 class ResizerDemo extends React.Component {
     state={

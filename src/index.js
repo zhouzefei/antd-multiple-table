@@ -26,16 +26,19 @@ export default (props) => {
 	// 表格初始化
 	const initTable = () => {
         let nextColumns = [...columnsProps];
-        let storageWidthValue = localStorage.getItem(cacheNameSpace);
-        if(storageWidthValue){
-            storageWidthValue = JSON.parse(storageWidthValue);
-        }
-        nextColumns = nextColumns.map((v,colI)=>{
-            if(storageWidthValue && storageWidthValue[colI]){
-                v.width = storageWidthValue[colI];
+        if(cacheNameSpace){
+            let storageWidthValue = localStorage.getItem(cacheNameSpace);
+            if(storageWidthValue){
+                storageWidthValue = JSON.parse(storageWidthValue);
+                nextColumns = nextColumns.map((v,colI)=>{
+                    if(storageWidthValue && storageWidthValue[colI]){
+                        v.width = storageWidthValue[colI];
+                    }
+                    return v;
+                });
             }
-            return v;
-        });
+        }
+
         const scrollXTemp = storageWidthValue.scrollX;
 
         let tableDefaultWidth = tableEl && tableEl.current && tableEl.current.clientWidth;
@@ -113,18 +116,20 @@ export default (props) => {
         const width = Math.max(size.width, colMinWidth);
         const scrollXTemp = Number(scrollX) + (width - nextColumns[index].width);
         // ------start缓存处理
-        let storageWidthValue = localStorage.getItem(cacheNameSpace);
-        if(storageWidthValue){
-            storageWidthValue = JSON.parse(storageWidthValue);
-        }else{
-            storageWidthValue = {};
+        if(cacheNameSpace){
+            let storageWidthValue = localStorage.getItem(cacheNameSpace);
+            if(storageWidthValue){
+                storageWidthValue = JSON.parse(storageWidthValue);
+            }else{
+                storageWidthValue = {};
+            }
+            storageWidthValue = {
+                ...storageWidthValue,
+                [index]:width,
+                scrollX: scrollXTemp
+            }
+            localStorage.setItem(cacheNameSpace,JSON.stringify(storageWidthValue));
         }
-        storageWidthValue = {
-            ...storageWidthValue,
-            [index]:width,
-            scrollX: scrollXTemp
-        }
-        localStorage.setItem(cacheNameSpace,JSON.stringify(storageWidthValue));
         // ------end缓存处理
 
         setScrollX(scrollXTemp);
