@@ -1,0 +1,44 @@
+.tntd-multi-table{
+    .react-resizable {
+        position: relative;
+        background-clip: border-box;
+    }
+
+    .react-resizable-handle {
+        position: absolute;
+        width: 10px;
+        height: 100%;
+        bottom: 0;
+        right: -5px;
+        cursor: col-resize;
+        z-index: 1;
+    }
+    th:last-of-type{
+        .react-resizable-handle {
+            right: 0;
+        }
+    }
+    // tbody > tr > td > *,
+    .ant-table-column-title{
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+    .ant-table-column-sorters {
+        display: inline-flex;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        align-items: center;
+    }
+    tr.drop-over-downward td {
+        border-bottom: 1px dashed #1890ff;
+    }
+
+    tr.drop-over-upward td {
+        border-top: 1px dashed #1890ff;
+    }
+}
+
+
