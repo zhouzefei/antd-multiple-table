@@ -5,7 +5,6 @@
 _roadhog-api-doc
 
 # production
-/dist
 
 # misc
 .DS_Store
@@ -13,7 +12,8 @@ npm-debug.log*
 
 /coverage
 .idea
-
+/src
+/test
 # vscode
 .vscode
 

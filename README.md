@@ -3,24 +3,18 @@
 - 拖拽
 
 ### 使用方法
-`npm install @tntd/table-multiple --save`
+`npm install @tntd/table-resizer --save`
 
 
 ### 参数
 |  参数   | 作用  |
 |  ----  |  ----  |
-|  stretchabel  | 可拉伸|
 |  cacheNameSpace  | 将拉伸后的操作缓存在localstorage key为`${cacheNameSpace}`的对象中，列索引作为具体列的key|
-|  draggable  | 可拖拽|
-|  dragCallBack  | 拖拽回调|
 
 
 ```javascript
-    <MultiTable
+    <ResizeTable
         cacheNameSpace="test"
-        stretchabel={true} // 可拉伸的
-        draggable={true} // 支持拖拽
-        dragCallBack={this.dragCallBack}
     >
         <Table
             columns={[{
@@ -75,5 +69,5 @@
                 x: 1400
             }}
         />
-    </MultiTable>
+    </ResizeTable>
 ```

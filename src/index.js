@@ -2,11 +2,9 @@ import React, { useEffect, useRef, useState, Suspense } from "react";
 import "./index.less";
 
 const ResizeTable = React.lazy(()=>import("./ResizeTable"));
-const DragTable = React.lazy(()=>import("./DragTable"));
-const MultiTable = React.lazy(()=>import("./MultiTable"));
 
 export default (props) => {
-	const { children, colMinWidth=70, stretchabel=true, cacheNameSpace, draggable, dragCallBack } = props;
+	const { children, colMinWidth=70, cacheNameSpace } = props;
     const { scroll, columns:columnsProps, ...tableProps } = children.props || {};
 
     const { x } = scroll || {};
@@ -17,7 +15,7 @@ export default (props) => {
 
     // 监听列变化初始化
     useEffect(()=>{
-        if(stretchabel && columnsProps && columnsProps.length){
+        if(columnsProps && columnsProps.length){
             initTable();
         }
     },[columnsProps]);
@@ -26,6 +24,7 @@ export default (props) => {
 	// 表格初始化
 	const initTable = () => {
         let nextColumns = [...columnsProps];
+        let scrollXTemp = 0;
         if(cacheNameSpace){
             let storageWidthValue = localStorage.getItem(cacheNameSpace);
             if(storageWidthValue){
@@ -36,57 +35,43 @@ export default (props) => {
                     }
                     return v;
                 });
+                scrollXTemp = storageWidthValue.scrollX;
             }
         }
 
-        const scrollXTemp = storageWidthValue.scrollX;
-
         let tableDefaultWidth = tableEl && tableEl.current && tableEl.current.clientWidth;
-        // 统计总长度 如果小于屏幕宽度则平均分配
-		if(x < tableDefaultWidth){
-            tableDefaultWidth = scrollXTemp || tableDefaultWidth; // 如果有缓存的scroll使用缓存的
-			nextColumns = nextColumns.map(c=>{
-				if(c.width){
-					return {
-						...c,
-						width: c.width / x * tableDefaultWidth
-					}
-				}else{
-					return c
-				}
-			});
-		}else{
-            tableDefaultWidth = scrollXTemp || x || tableDefaultWidth; // 如果有缓存的scroll使用缓存的
-            // 针对没有设置段度的列进行宽度平均分配
-            let [widCount,columnIArr] = [0,[]];
-            nextColumns.forEach((column,i)=>{
-                if(!column.width){
-                    columnIArr.push(i);
-                }else{
-                    if(typeof column.width === "string"){
-                        column.width =  column.width.replace("px",'')
-                    }
-                    widCount += Number(column.width)
+        tableDefaultWidth = scrollXTemp || Math.max(x, tableDefaultWidth); // 如果有缓存的scroll使用缓存的
+        console.log("tableDefaultWidth",tableDefaultWidth)
+        // 针对没有设置段度的列进行宽度平均分配
+        let [widCount,columnIArr] = [0,[]];
+        nextColumns.forEach((column,i)=>{
+            if(!column.width){
+                columnIArr.push(i);
+            }else{
+                if(typeof column.width === "string"){
+                    column.width =  column.width.replace("px",'')
                 }
-            });
-            const restWid = tableDefaultWidth - widCount;
-            const average = restWid / columnIArr.length; // 平均宽度
+                widCount += Number(column.width)
+            }
+        });
+        const restWid = tableDefaultWidth - widCount;
+        const average = restWid / columnIArr.length; // 平均宽度
 
-            columnIArr.length &&
-            columnIArr.forEach((v,i)=>{
-                nextColumns[v]={
-                    ...nextColumns[v],
-                    width:average
-                }
-            });
-        };
+        columnIArr.length &&
+        columnIArr.forEach((v,i)=>{
+            nextColumns[v]={
+                ...nextColumns[v],
+                width:average
+            }
+        });
+
         setScrollX(tableDefaultWidth);
 		setColumns(nextColumns);
 	};
 
     // 监听初始化
 	useEffect(()=>{
-		if(stretchabel && columns && columns.length>0){
+		if(columns && columns.length>0){
 			initLeftFixedTable();
 			initRightFixedTable();
 		}
@@ -140,68 +125,23 @@ export default (props) => {
 		setColumns(nextColumns);
 	};
 
-    // 拖拽回调
-    const moveRow = (dragIndex, hoverIndex) => {
-        dragCallBack && dragCallBack(dragIndex, hoverIndex)
-    };
 
 	return (
         <div ref={tableEl} className="tntd-multi-table">
             {
                 React.Children.map(children, table => {
                     return (
-                        <>
-                            {
-                                stretchabel &&
-                                !draggable &&
-                                <Suspense fallback={null}>
-                                    <ResizeTable
-                                        table={table}
-                                        handleResize={handleResize}
-                                        columns={columns}
-                                        scroll={{
-                                            ...scroll,
-                                            x: scrollX
-                                        }}
-                                        {...tableProps}
-                                    />
-                                </Suspense>
-                            }
-                            {
-                                !stretchabel &&
-                                draggable &&
-                                <Suspense fallback={null}>
-                                    <DragTable
-                                        table={table}
-                                        columns={columns}
-                                        moveRow={moveRow}
-                                        scroll={{
-                                            ...scroll,
-                                            x: scrollX
-                                        }}
-                                        {...tableProps}
-                                    />
-                                </Suspense>
-                            }
-
-                            {
-                                stretchabel &&
-                                draggable &&
-                                <Suspense fallback={null}>
-                                    <MultiTable
-                                        table={table}
-                                        handleResize={handleResize}
-                                        moveRow={moveRow}
-                                        columns={columns}
-                                        scroll={{
-                                            ...scroll,
-                                            x: scrollX
-                                        }}
-                                        {...tableProps}
-                                    />
-                                </Suspense>
-                            }
-                        </>
+                        <Suspense fallback={null}>
+                            <ResizeTable
+                                table={table}
+                                handleResize={handleResize}
+                                columns={columns}
+                                scroll={{
+                                    x: scrollX
+                                }}
+                                {...tableProps}
+                            />
+                        </Suspense>
                     )
                 })
             }
